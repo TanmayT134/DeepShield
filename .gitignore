@@ -1,0 +1,60 @@
+# ===========================
+# Virtual Environment
+# ===========================
+venv/
+
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.pyc
+*.pyo
+
+# ===========================
+# Jupyter
+# ===========================
+.ipynb_checkpoints/
+
+# ===========================
+# Models
+# ===========================
+models/checkpoints/
+models/best/
+models/final/
+*.keras
+*.h5
+
+# ===========================
+# Outputs
+# ===========================
+outputs/
+
+# ===========================
+# Temporary Files
+# ===========================
+temp/
+temp_frames/
+
+# ===========================
+# Datasets
+# ===========================
+dataset/raw/
+dataset/processed/
+dataset/cnn_dataset/
+dataset/video_sequences/
+
+# ===========================
+# Large Raw Dataset
+# ===========================
+dataset/raw/Celeb-DF/
+
+# ===========================
+# VS Code
+# ===========================
+.vscode/
+
+# ===========================
+# Operating System
+# ===========================
+.DS_Store
+Thumbs.db
