@@ -3,6 +3,7 @@ import shutil
 import time
 from src.utils import tensorflow_setup
 import tensorflow as tf
+import cv2
 
 from src.preprocessing.frame_extractor import FrameExtractor
 from src.preprocessing.face_detector import FaceDetector
@@ -68,15 +69,28 @@ class VideoPredictor:
                 image_name
             )
 
-            image = self.image_processor.preprocess(image_path)
+            image = cv2.imread(image_path)
 
-            label, confidence = self.predictor.predict(image)
+            if image is None:
+                continue
 
-            predictions.append((label, confidence))
+            image = self.image_processor.preprocess(image)
 
-            if label == "Real":
+            result = self.predictor.predict(image)
+
+            predictions.append(
+                (
+                    result["label"],
+                    result["confidence"]
+                )
+            )
+
+            if result["label"] == "Real":
+
                 real_count += 1
+
             else:
+
                 fake_count += 1
 
         final_prediction = Voting.majority_vote(predictions)

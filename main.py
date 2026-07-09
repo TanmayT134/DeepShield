@@ -1,11 +1,28 @@
-from src.utils import tensorflow_setup
-from src.models.cnn import DeepShieldCNN
-from src.training.trainer import Trainer
+import os
+import tensorflow as tf
 
-from src.datasets.dataloader import create_dataset
+# ==================================================
+# TensorFlow Setup
+# ==================================================
+
+from src.utils.tensorflow_setup import setup_tensorflow
+
+setup_tensorflow()
+
+# ==================================================
+# Configuration
+# ==================================================
 
 from config.config import *
 
+# ==================================================
+# Dataset
+# ==================================================
+
+from src.datasets.dataloader import create_dataset
+from src.utils.dataset_statistics import print_dataset_statistics
+
+print("\nLoading datasets...\n")
 
 train_dataset = create_dataset(
     TRAIN_PATH,
@@ -17,41 +34,130 @@ validation_dataset = create_dataset(
     training=False
 )
 
+test_dataset = create_dataset(
+    TEST_PATH,
+    training=False
+)
 
-import tensorflow as tf
-import os
+print("\nDataset Statistics\n")
 
-MODEL_PATH = "models/best/best_cnn.keras"
+print_dataset_statistics(
+    train_dataset,
+    "Train"
+)
 
-if os.path.exists(MODEL_PATH):
+print_dataset_statistics(
+    validation_dataset,
+    "Validation"
+)
 
-    print("Loading Best Model...")
+print_dataset_statistics(
+    test_dataset,
+    "Test"
+)
 
-    model = tf.keras.models.load_model(MODEL_PATH)
+# ==================================================
+# Model
+# ==================================================
+
+from src.models.cnn import DeepShieldCNN
+from src.utils.save_model_summary import save_model_summary
+
+CHECKPOINT_PATH = "models/checkpoints/checkpoint.keras"
+
+if os.path.exists(CHECKPOINT_PATH):
+
+    print("\nResuming from latest checkpoint...\n")
+
+    model = tf.keras.models.load_model(
+        CHECKPOINT_PATH
+    )
+
+elif os.path.exists(MODEL_PATH):
+
+    print("\nLoading best model...\n")
+
+    model = tf.keras.models.load_model(
+        MODEL_PATH
+    )
 
 else:
+
+    print("\nBuilding new model...\n")
 
     cnn = DeepShieldCNN()
 
     model = cnn.build()
 
+save_model_summary(model)
+
+# ==================================================
+# Training
+# ==================================================
+
+from src.training.trainer import Trainer
 
 trainer = Trainer(model)
 
 trainer.compile()
 
 history = trainer.train(
+
     train_dataset,
+
     validation_dataset
+
 )
+
+# ==================================================
+# Save Training History
+# ==================================================
+
+from src.utils.save_history import save_history
+
+save_history(history)
+
+# ==================================================
+# Plot Training Curves
+# ==================================================
+
+from src.utils.history_plotter import HistoryPlotter
+
+plotter = HistoryPlotter(history)
+
+plotter.plot()
+
+# ==================================================
+# Evaluation
+# ==================================================
 
 from src.evaluation.evaluate import Evaluator
-
-test_dataset = create_dataset(
-    TEST_PATH,
-    training=False
-)
 
 evaluator = Evaluator(model)
 
 evaluator.evaluate(test_dataset)
+
+# ==================================================
+# Save Final Model
+# ==================================================
+
+os.makedirs(
+    "models/final",
+    exist_ok=True
+)
+
+FINAL_MODEL_PATH = os.path.join(
+    "models",
+    "final",
+    "final_cnn.keras"
+)
+
+model.save(
+    FINAL_MODEL_PATH
+)
+
+print("\nFinal model saved successfully.")
+
+print(f"Location : {FINAL_MODEL_PATH}")
+
+print("\nDeepShield Pipeline Completed Successfully.")

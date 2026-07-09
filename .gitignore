@@ -58,3 +58,8 @@ dataset/raw/Celeb-DF/
 # ===========================
 .DS_Store
 Thumbs.db
+
+# ===========================
+# Model Checkpoints
+# ===========================
+models/checkpoints/

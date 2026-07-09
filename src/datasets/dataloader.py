@@ -18,19 +18,25 @@ def create_dataset(path, training=True):
         label_mode="binary",
         image_size=IMAGE_SIZE,
         batch_size=BATCH_SIZE,
-        shuffle=training
+        shuffle=training,
+        seed=SEED
     )
 
     if training:
+
         dataset = dataset.map(
             preprocess_train,
             num_parallel_calls=AUTOTUNE
         )
+
     else:
+
         dataset = dataset.map(
             preprocess_test,
             num_parallel_calls=AUTOTUNE
         )
+
+        dataset = dataset.cache()
 
     dataset = dataset.prefetch(AUTOTUNE)
 

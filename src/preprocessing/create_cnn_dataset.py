@@ -2,122 +2,174 @@ import os
 import shutil
 import random
 
-random.seed(42)
-
 from config.config import *
 
-SOURCE = PROCESSED_PATH
-DESTINATION = CNN_DATASET
-
-TRAIN_RATIO = 0.70
-VALID_RATIO = 0.15
-TEST_RATIO = 0.15
+random.seed(SEED)
 
 
-def collect_images(folder):
+# ==================================================
+# Clean Previous Dataset
+# ==================================================
 
-    images = []
+if os.path.exists(CNN_DATASET):
+    shutil.rmtree(CNN_DATASET)
 
-    for video in os.listdir(folder):
+os.makedirs(CNN_DATASET, exist_ok=True)
+
+
+# ==================================================
+# Get Videos
+# ==================================================
+
+def collect_videos(folder):
+
+    videos = []
+
+    for video in sorted(os.listdir(folder)):
 
         video_path = os.path.join(folder, video)
 
-        if not os.path.isdir(video_path):
-            continue
+        if os.path.isdir(video_path):
+            videos.append(video_path)
 
-        for image in os.listdir(video_path):
-
-            if image.lower().endswith(".jpg"):
-
-                images.append(
-                    os.path.join(video_path, image)
-                )
-
-    return images
+    return videos
 
 
-def split_dataset(images):
+# ==================================================
+# Split Videos
+# ==================================================
 
-    random.shuffle(images)
+def split_videos(videos):
 
-    n = len(images)
+    random.shuffle(videos)
 
-    train = images[:int(0.70*n)]
+    n = len(videos)
 
-    valid = images[int(0.70*n):int(0.85*n)]
+    train = videos[:int(TRAIN_RATIO * n)]
 
-    test = images[int(0.85*n):]
+    validation = videos[
+        int(TRAIN_RATIO * n):
+        int((TRAIN_RATIO + VALID_RATIO) * n)
+    ]
 
-    return train, valid, test
+    test = videos[
+        int((TRAIN_RATIO + VALID_RATIO) * n):
+    ]
+
+    return train, validation, test
 
 
-def copy_images(image_list, destination):
+# ==================================================
+# Copy Frames
+# ==================================================
+
+def copy_frames(video_list, destination, label):
+
+    destination = os.path.join(
+        destination,
+        label
+    )
 
     os.makedirs(destination, exist_ok=True)
 
-    for image in image_list:
+    total_images = 0
 
-        # Parent folder name (video name)
-        video_name = os.path.basename(
-            os.path.dirname(image)
-        )
+    for video in video_list:
 
-        # Original image name
-        image_name = os.path.basename(image)
+        video_name = os.path.basename(video)
 
-        # Unique filename
-        new_name = f"{video_name}_{image_name}"
+        images = [
 
-        destination_file = os.path.join(
-            destination,
-            new_name
-        )
+            image
 
-        shutil.copy(
-            image,
-            destination_file
-        )
+            for image in sorted(os.listdir(video))
+
+            if image.lower().endswith(".jpg")
+
+        ]
+
+        random.shuffle(images)
+
+        images = images[:MAX_IMAGES_PER_VIDEO]
+
+        for image in images:
+
+            source = os.path.join(
+                video,
+                image
+            )
+
+            destination_name = f"{video_name}_{image}"
+
+            shutil.copy(
+                source,
+                os.path.join(
+                    destination,
+                    destination_name
+                )
+            )
+
+            total_images += 1
+
+    return total_images
 
 
-for label in ["real", "fake"]:
+# ==================================================
+# Create Dataset
+# ==================================================
 
-    source = os.path.join(SOURCE, label)
+def create_dataset(label):
 
-    images = collect_images(source)
+    source = os.path.join(
+        PROCESSED_PATH,
+        label
+    )
 
-    train, valid, test = split_dataset(images)
+    videos = collect_videos(source)
 
-    copy_images(
+    print(f"\n{label.upper()}")
+
+    print(f"Videos : {len(videos)}")
+
+    train, validation, test = split_videos(videos)
+
+    train_images = copy_frames(
         train,
-        os.path.join(
-            DESTINATION,
-            "train",
-            label
-        )
+        os.path.join(CNN_DATASET, "train"),
+        label
     )
 
-    copy_images(
-        valid,
-        os.path.join(
-            DESTINATION,
-            "validation",
-            label
-        )
+    validation_images = copy_frames(
+        validation,
+        os.path.join(CNN_DATASET, "validation"),
+        label
     )
 
-    copy_images(
+    test_images = copy_frames(
         test,
-        os.path.join(
-            DESTINATION,
-            "test",
-            label
-        )
+        os.path.join(CNN_DATASET, "test"),
+        label
     )
 
-    print(f"{label}")
+    print(f"Train Videos      : {len(train)}")
+    print(f"Validation Videos : {len(validation)}")
+    print(f"Test Videos       : {len(test)}")
 
-    print(f"Train : {len(train)}")
+    print()
 
-    print(f"Validation : {len(valid)}")
+    print(f"Train Images      : {train_images}")
+    print(f"Validation Images : {validation_images}")
+    print(f"Test Images       : {test_images}")
 
-    print(f"Test : {len(test)}")
+
+# ==================================================
+# Main
+# ==================================================
+
+if __name__ == "__main__":
+
+    create_dataset("real")
+
+    create_dataset("fake")
+
+    print("\nCNN Dataset Created Successfully.")

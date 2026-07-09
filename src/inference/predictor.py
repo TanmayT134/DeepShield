@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 
 from config.config import *
@@ -12,23 +11,44 @@ class Predictor:
 
     def predict(self, image):
 
-        image = np.expand_dims(image, axis=0)
-
-        probability = self.model.predict(
+        image = np.expand_dims(
             image,
-            verbose=0
-        )[0][0]
-
-        label = (
-            "Fake"
-            if probability >= PREDICTION_THRESHOLD
-            else "Real"
+            axis=0
         )
 
-        confidence = (
-            probability
-            if label == "Fake"
-            else 1 - probability
+        probability = float(
+
+            self.model.predict(
+                image,
+                verbose=0
+            )[0][0]
+
         )
 
-        return label, float(confidence)
+        if probability >= PREDICTION_THRESHOLD:
+
+            label = "Fake"
+
+            confidence = probability
+
+        else:
+
+            label = "Real"
+
+            confidence = 1.0 - probability
+
+        return {
+
+            "label": label,
+
+            "confidence": round(
+                confidence,
+                4
+            ),
+
+            "probability": round(
+                probability,
+                4
+            )
+
+        }

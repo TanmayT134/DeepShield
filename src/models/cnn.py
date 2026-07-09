@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras import Model
 from tensorflow.keras.layers import (
     Input,
@@ -54,11 +54,22 @@ class DeepShieldCNN:
         x = Dropout(0.30)(x)
 
         x = Dense(
-            128,
-            activation="relu"
+            DENSE_UNITS,
+            activation="relu",
+            kernel_regularizer=l2(L2_REGULARIZATION)
         )(x)
 
-        x = Dropout(0.20)(x)
+        x = BatchNormalization()(x)
+
+        x = Dropout(DROPOUT_1)(x)
+
+        x = Dense(
+            SECOND_DENSE_UNITS,
+            activation="relu",
+            kernel_regularizer=l2(L2_REGULARIZATION)
+        )(x)
+
+        x = Dropout(DROPOUT_2)(x)
 
         outputs = Dense(
             1,
