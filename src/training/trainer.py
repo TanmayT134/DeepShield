@@ -43,9 +43,10 @@ class Trainer:
 
     ):
 
-        class_weights = get_class_weights(
-            train_dataset
-        )
+        class_weights = None
+
+        if USE_CLASS_WEIGHTS:
+            class_weights = get_class_weights(train_dataset)
         
         history = self.model.fit(
             train_dataset,

@@ -106,3 +106,11 @@ FACE_CONFIDENCE_THRESHOLD = 0.90
 FRAME_INTERVAL = 10
 
 USE_CLASS_WEIGHTS = True
+
+# ==================================================
+# Dataset Split
+# ==================================================
+
+TRAIN_RATIO = 0.70
+VALID_RATIO = 0.15
+TEST_RATIO = 0.15
