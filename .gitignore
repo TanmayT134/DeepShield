@@ -21,8 +21,17 @@ __pycache__/
 models/checkpoints/
 models/best/
 models/final/
+models/baseline_v1/
+
+# Ignore all models by default
 *.keras
 *.h5
+
+# Keep final trained models
+!models/
+!models/finetune/
+!models/finetune/best_cnn_finetuned.keras
+!models/finetune/final_cnn_finetuned.keras
 
 # ===========================
 # Outputs
@@ -63,3 +72,8 @@ Thumbs.db
 # Model Checkpoints
 # ===========================
 models/checkpoints/
+
+# ===========================
+# Archives
+# ===========================
+*.zip

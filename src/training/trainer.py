@@ -1,10 +1,9 @@
+
 import tensorflow as tf
 
 from config.config import *
 
 from src.training.callbacks import get_callbacks
-
-from src.training.class_weights import get_class_weights
 
 
 class Trainer:
@@ -43,18 +42,18 @@ class Trainer:
 
     ):
 
-        class_weights = None
-
-        if USE_CLASS_WEIGHTS:
-            class_weights = get_class_weights(train_dataset)
-        
         history = self.model.fit(
+
             train_dataset,
+
             validation_data=validation_dataset,
+
             epochs=EPOCHS,
+
             callbacks=get_callbacks(),
-            class_weight=class_weights,
+
             verbose=1
+
         )
 
         return history

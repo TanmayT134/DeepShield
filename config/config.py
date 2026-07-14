@@ -40,9 +40,9 @@ CHANNELS = 3
 # ==================================================
 
 BATCH_SIZE = 32
-EPOCHS = 30
+EPOCHS = 25
 
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 
 NUM_CLASSES = 2
 
@@ -52,7 +52,7 @@ NUM_CLASSES = 2
 
 MODEL_NAME = "EfficientNetB0"
 
-MODEL_PATH = "models/best/best_cnn.keras"
+MODEL_PATH = "models/finetune/best_cnn_finetuned.keras"
 
 PREDICTION_THRESHOLD = 0.5
 
@@ -60,7 +60,7 @@ PREDICTION_THRESHOLD = 0.5
 # Fine Tuning
 # ==================================================
 
-FREEZE_BACKBONE = False
+FREEZE_BACKBONE = True
 
 UNFREEZE_LAST_LAYERS = 40
 
@@ -105,7 +105,7 @@ FACE_CONFIDENCE_THRESHOLD = 0.90
 
 FRAME_INTERVAL = 10
 
-USE_CLASS_WEIGHTS = True
+USE_CLASS_WEIGHTS = False
 
 # ==================================================
 # Dataset Split

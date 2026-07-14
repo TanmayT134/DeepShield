@@ -28,7 +28,10 @@ class DeepShieldCNN:
             )
         )
 
-        self.base_model.trainable = not FREEZE_BACKBONE
+        self.base_model.trainable = True
+
+        for layer in self.base_model.layers[:-UNFREEZE_LAST_LAYERS]:
+            layer.trainable = False
 
         if not FREEZE_BACKBONE:
 
@@ -73,7 +76,8 @@ class DeepShieldCNN:
 
         outputs = Dense(
             1,
-            activation="sigmoid"
+            activation="sigmoid",
+            dtype="float32"
         )(x)
 
         model = Model(
