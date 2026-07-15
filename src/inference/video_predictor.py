@@ -17,7 +17,10 @@ class VideoPredictor:
 
     def __init__(self, model_path):
 
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = tf.keras.models.load_model(
+            model_path,
+            compile=False
+        )
 
         self.predictor = Predictor(self.model)
 
@@ -38,9 +41,12 @@ class VideoPredictor:
         os.makedirs(self.temp_frames, exist_ok=True)
         os.makedirs(self.temp_faces, exist_ok=True)
 
-    def predict_video(self, video_path):
+    def predict_video(self, video_path, progress_callback=None):
 
         start = time.time()
+        
+        if progress_callback:
+            progress_callback(0.05, "🛠 Preparing Workspace...")
 
         self.clear_temp()
 
@@ -48,21 +54,32 @@ class VideoPredictor:
             video_path,
             self.temp_frames
         )
+        
+        if progress_callback:
+            progress_callback(0.25, "📷 Extracting Frames...")
 
         total_faces = self.face_detector.detect_faces(
             self.temp_frames,
             self.temp_faces
         )
 
+        if progress_callback:
+            progress_callback(0.50, "😀 Detecting Faces...")
+
         predictions = []
 
         real_count = 0
         fake_count = 0
+        
+        sample_frames = []
 
         if not os.listdir(self.temp_faces):
             raise ValueError("No faces detected in video.")
+        
+        images = sorted(os.listdir(self.temp_faces))
+        total = len(images)
 
-        for image_name in sorted(os.listdir(self.temp_faces)):
+        for idx, image_name in enumerate(images):
 
             image_path = os.path.join(
                 self.temp_faces,
@@ -77,6 +94,20 @@ class VideoPredictor:
             image = self.image_processor.preprocess(image)
 
             result = self.predictor.predict(image)
+            
+            sample_frames.append({
+
+                "path": image_path,
+
+                "label": result["label"],
+
+                "confidence": result["confidence"]
+
+            })
+            
+            if progress_callback:
+                progress = 0.50 + (idx + 1) / total * 0.45
+                progress_callback(progress, "🧠 Running Deep Learning Model...")
 
             predictions.append(
                 (
@@ -97,14 +128,28 @@ class VideoPredictor:
         average_confidence = Voting.average_confidence(predictions)
 
         end = time.time()
+        
+        if progress_callback:
+            progress_callback(1.0, "✅ Analysis Completed Successfully")
 
         return {
+
             "video": os.path.basename(video_path),
+
             "frames": total_frames,
+
             "faces": total_faces,
+
             "real_frames": real_count,
+
             "fake_frames": fake_count,
+
             "prediction": final_prediction,
+
             "confidence": average_confidence,
-            "time": end - start
+
+            "time": end - start,
+
+            "sample_frames": sample_frames[:6]
+
         }

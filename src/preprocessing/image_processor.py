@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
 
 class ImageProcessor:
@@ -43,6 +44,6 @@ class ImageProcessor:
 
         image = image.astype(np.float32)
 
-        image /= 255.0
+        image = preprocess_input(image)
 
         return image
