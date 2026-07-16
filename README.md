@@ -30,8 +30,6 @@ An end-to-end AI-powered web application that detects whether a video is <b>Real
 
 <img src="https://img.shields.io/badge/Render-Deployed-success?logo=render">
 
-<img src="https://img.shields.io/badge/License-MIT-blue">
-
 </p>
 
 ---
@@ -274,15 +272,14 @@ DeepShield/
 │       └── best_cnn_finetuned.keras
 │
 ├── src/
-│   ├── preprocessing/
-│   ├── inference/
-│   ├── evaluation/
-│   ├── training/
-│   ├── models/
-│   ├── utils/
-│   └── explainability/
-│
-└── LICENSE
+    ├── preprocessing/
+    ├── inference/
+    ├── evaluation/
+    ├── training/
+    ├── models/
+    ├── utils/
+    └── explainability/
+
 ```
 
 ---
